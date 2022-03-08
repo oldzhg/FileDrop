@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"path"
@@ -27,6 +28,8 @@ func main() {
 		})
 		staticFiles, _ := fs.Sub(FS, "frontend/dist")
 		router.POST("/api/v1/texts", TextsController)
+		router.GET("/uploads/:path", UploadsController)
+		router.GET("/api/v1/addresses", AddressesController)
 		router.StaticFS("/static", http.FS(staticFiles))
 		router.NoRoute(func(c *gin.Context) {
 			path := c.Request.URL.Path
@@ -54,6 +57,44 @@ func main() {
 	//select {
 	//
 	//}
+}
+
+func GetUploadsDir() (uploads string)  {
+	exe, err := os.Executable() //
+	if err != nil {
+		log.Fatalln(err)
+	}
+	dir := filepath.Dir(exe) // 获取当前可执行文件所在目录
+	uploads = filepath.Join(dir, "uploads")
+	return
+}
+
+func UploadsController(context *gin.Context) {
+	if path := context.Param("path"); path != "" {
+		target := filepath.Join(GetUploadsDir(), path)
+		context.Header("Content-Description", "File Transfer")
+		context.Header("Content-Transfer-Encoding", "binary")
+		context.Header("Content-Disposition", "attachment; filename="+path)
+		context.Header("Content-Type", "application/octet-stream")
+		context.File(target)
+	} else {
+		context.Status(http.StatusNotFound)
+	}
+}
+
+func AddressesController(context *gin.Context) {
+	addrs, _ := net.InterfaceAddrs()
+	var result []string
+	for _, address := range addrs {
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				result = append(result, ipnet.IP.String())
+			}
+		}
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"addresses": result,
+	})
 }
 
 func TextsController(context *gin.Context) {
