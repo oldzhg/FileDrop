@@ -4,6 +4,7 @@ import (
 	"embed"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/skip2/go-qrcode"
 	"github.com/zserge/lorca"
 	"io/fs"
 	"io/ioutil"
@@ -28,8 +29,10 @@ func main() {
 		})
 		staticFiles, _ := fs.Sub(FS, "frontend/dist")
 		router.POST("/api/v1/texts", TextsController)
+		router.POST("/api/v1/files", FilesController)
 		router.GET("/uploads/:path", UploadsController)
 		router.GET("/api/v1/addresses", AddressesController)
+		router.GET("api/v1/qrcodes", QrcodesController)
 		router.StaticFS("/static", http.FS(staticFiles))
 		router.NoRoute(func(c *gin.Context) {
 			path := c.Request.URL.Path
@@ -57,6 +60,45 @@ func main() {
 	//select {
 	//
 	//}
+}
+
+func FilesController(context *gin.Context)  {
+	file, err := context.FormFile("raw")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	exe, err := os.Executable()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	dir := filepath.Dir(exe)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	filename := uuid.New().String()
+	uploads := path.Join(dir, "uploads")
+	err = os.MkdirAll(uploads, os.ModePerm)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fullpath := path.Join(uploads, filename + filepath.Ext(file.Filename))
+	fileErr := context.SaveUploadedFile(file, filepath.Join(dir, fullpath))
+	if fileErr != nil {
+		log.Fatalln(fileErr)
+	}
+	context.JSON(http.StatusOK, gin.H{"url": "/" + fullpath})
+}
+
+func QrcodesController(context *gin.Context) {
+	if content := context.Query("content"); content != "" {
+		png, err := qrcode.Encode(content, qrcode.Medium, 256)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		context.Data(http.StatusOK, "image/png", png)
+	} else {
+		context.Status(http.StatusBadRequest)
+	}
 }
 
 func GetUploadsDir() (uploads string)  {
