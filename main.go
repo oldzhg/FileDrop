@@ -7,11 +7,8 @@ import (
 
 
 func main() {
-	go func() {
-		server.Run()
-	}()
+	go server.Run()
 	ui, _ := lorca.New("http://localhost:27149/static", "", 1200, 800)
-
 	<-ui.Done()
 	ui.Close()
 }
