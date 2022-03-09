@@ -2,6 +2,7 @@ package server
 
 import (
 	"chatDemo/controller"
+	"chatDemo/server/ws"
 	"embed"
 	"github.com/gin-gonic/gin"
 	"io/fs"
@@ -13,7 +14,10 @@ import (
 
 //go:embed frontend/dist/*
 var FS embed.FS
+
 func Run() {
+	hub := ws.NewHub()
+	go hub.Run()
 	gin.SetMode(gin.DebugMode)
 	router := gin.Default()
 	router.GET("/", func(c *gin.Context) {
@@ -25,6 +29,9 @@ func Run() {
 	router.GET("/uploads/:path", controller.UploadsController)
 	router.GET("/api/v1/addresses", controller.AddressesController)
 	router.GET("/api/v1/qrcodes", controller.QrcodesController)
+	router.GET("/ws", func(c *gin.Context) {
+		ws.HttpController(c, hub)
+	})
 	router.StaticFS("/static", http.FS(staticFiles))
 	router.NoRoute(func(c *gin.Context) {
 		path := c.Request.URL.Path
