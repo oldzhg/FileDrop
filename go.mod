@@ -1,4 +1,4 @@
-module chatDemo
+module FileDrop
 
 go 1.16
 

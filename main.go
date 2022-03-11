@@ -1,10 +1,9 @@
 package main
 
 import (
-	"chatDemo/server"
+	"FileDrop/server"
 	"github.com/zserge/lorca"
 )
-
 
 func main() {
 	go server.Run()
@@ -12,5 +11,3 @@ func main() {
 	<-ui.Done()
 	ui.Close()
 }
-
-

@@ -1,8 +1,8 @@
 package server
 
 import (
-	"chatDemo/controller"
-	"chatDemo/server/ws"
+	"FileDrop/controller"
+	"FileDrop/server/ws"
 	"embed"
 	"github.com/gin-gonic/gin"
 	"io/fs"
@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"strings"
 )
-
 
 //go:embed frontend/dist/*
 var FS embed.FS
@@ -52,8 +51,3 @@ func Run() {
 	})
 	router.Run(":27149")
 }
-
-
-
-
-

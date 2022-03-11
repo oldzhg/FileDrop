@@ -20,4 +20,3 @@ func AddressesController(context *gin.Context) {
 		"addresses": result,
 	})
 }
-

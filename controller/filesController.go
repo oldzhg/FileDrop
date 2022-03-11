@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 )
 
-func FilesController(context *gin.Context)  {
+func FilesController(context *gin.Context) {
 	file, err := context.FormFile("raw")
 	if err != nil {
 		log.Fatalln(err)
@@ -29,7 +29,7 @@ func FilesController(context *gin.Context)  {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fullpath := path.Join("uploads", filename + filepath.Ext(file.Filename))
+	fullpath := path.Join("uploads", filename+filepath.Ext(file.Filename))
 	fileErr := context.SaveUploadedFile(file, filepath.Join(dir, fullpath))
 	if fileErr != nil {
 		log.Fatalln(fileErr)

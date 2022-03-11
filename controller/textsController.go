@@ -26,7 +26,7 @@ func TextsController(context *gin.Context) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		filename := uuid.New().String()  // 生成随机文件名
+		filename := uuid.New().String() // 生成随机文件名
 		uploads := filepath.Join(dir, "uploads")
 		err = os.MkdirAll(uploads, os.ModePerm)
 		if err != nil {
